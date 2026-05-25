@@ -6,10 +6,10 @@
 
 // ─── ASSET CONFIG (update these paths before deploying) ─────
 const USER_IMAGE_URL = "/assets/vaibhav-avatar.jpg"; // Replace with real headshot
-const RESUME_URL = "/assets/vaibhav-resume.pdf";       // Replace with real resume
-const GITHUB_URL = "https://github.com/vaibhav-karbhantnal";
-const LINKEDIN_URL = "https://linkedin.com/in/vaibhav-karbhantnal";
-const EMAIL = "vaibuk1234@gmail.com";
+const RESUME_URL = "/assets/ResumeVaibhav3.pdf";       // Replace with real resume
+const GITHUB_URL = "https://github.com/NukGod-V";
+const LINKEDIN_URL = "https://www.linkedin.com/in/vaibhav-karbhantnal-8b4388257/";
+const EMAIL = "vaibhavk2one@gmail.com";
 const DOMAIN = "vaibhavkarbhantnal.me";
 // ────────────────────────────────────────────────────────────
 
@@ -462,6 +462,7 @@ const PROJECTS = [
     stat: "99% ACC",
     statLabel: "XGBoost Model",
     icon: "🌲",
+    link:"https://github.com/NukGod-V/Forest-Fire-Monitor",
     desc: "Geospatial AI pipeline ingesting live thermal satellite data → risk heatmap in milliseconds.",
   },
   {
@@ -473,6 +474,7 @@ const PROJECTS = [
     stat: "3 Tables",
     statLabel: "Normalized Schema",
     icon: "📡",
+    link:"https://github.com/NukGod-V/Mailer-System",
     desc: "End-to-end email orchestration: schedule → validate → dispatch → track transparently.",
   },
   {
@@ -484,35 +486,44 @@ const PROJECTS = [
     stat: "2 Agents",
     statLabel: "Dual-Core Arch",
     icon: "🕷",
+    link:"https://github.com/NukGod-V/crawlyzer",
     desc: "Orchestrated crawler + analyst agent loop — transforms raw web data into structured insight.",
   },
 ];
 
 const TIMELINE = [
   {
-    date: "Feb 2026",
-    label: "GRADUATION",
-    title: "MCA — BMS Institute of Technology",
-    detail: "Master of Computer Applications. USN: 1BY23MC097. Specialized in AI/ML integration and backend systems engineering.",
+    date: "May 2025",
+    label: "ENTERPRISE INTERNSHIP",
+    title: "Systems & Web Development Intern",
+    detail: "Engineered a production-grade Internal Mailer System. Architected a centralized Flask platform with role-based access, background job scheduling, and real-time delivery tracking.",
     accent: "blue",
-    side: "right",
-  },
-  {
-    date: "Mar 2025",
-    label: "HACKATHON",
-    title: "HackVerse MCA — Dept. of MCA",
-    detail: "Competed in the 48-hour HackVerse MCA Hackathon. Built a full-stack solution under time pressure.",
-    accent: "orange",
     side: "left",
   },
   {
-    date: "May 2025",
-    label: "INTERNSHIP",
-    title: "SWE Intern — RoborosX Omni Tech Solutions",
-    detail: "Designing scalable APIs for the RosX Edu Soft ERP platform. Mentor: Shravan Hiremath. Focus: high-throughput backend architecture.",
-    accent: "blue",
+    date: "Aug 2025",
+    label: "AI MODEL DEPLOYMENT",
+    title: "Forest Fire Risk Mapping System",
+    detail: "Designed a full-stack decision-support pipeline utilizing NASA FIRMS data and an XGBoost classification model achieving 99% test accuracy. Served via a high-performance FastAPI backend.",
+    accent: "orange",
     side: "right",
   },
+  {
+    date: "Feb 2026",
+    label: "ACADEMIC MILESTONE",
+    title: "MCA — BMS Institute of Technology",
+    detail: "Master of Computer Applications. Specialized in Data Science, Machine Learning, and production-grade systems engineering.",
+    accent: "blue",
+    side: "left",
+  },
+  {
+    date: "Current Track",
+    label: "ACTIVE ARCHITECTURE MATRIX",
+    title: "Distributed Systems & Cloud Operations",
+    detail: "Executing a rigorous system-scaling roadmap. Currently deploying asynchronous task queues (Celery/Redis), containerized microservices (Docker), CI/CD pipelines, and enterprise observability tools (Datadog, Sentry).",
+    accent: "orange",
+    side: "right",
+  }
 ];
 
 const SKILLS = [
@@ -814,10 +825,16 @@ function ProjectsSection() {
         gap: 2,
       }}>
         {PROJECTS.map((p, i) => (
-          <div
+          <a
             key={p.id}
+            href={p.link}
+            target="_blank"
+            rel="noopener noreferrer"
             className={`project-card ${p.accent} fade-up`}
             style={{
+              display: "block",       // 👈 Ensures the <a> tag behaves like a container
+              textDecoration: "none", // 👈 Removes the default blue underline
+              color: "inherit",       // 👈 Keeps your custom text colors intact
               padding: "40px 36px 36px",
               transitionDelay: `${i * 0.1}s`,
             }}
@@ -910,7 +927,7 @@ function ProjectsSection() {
                 INSPECT ARCHITECTURE
               </span>
             </div>
-          </div>
+          </a>
         ))}
       </div>
     </section>
@@ -1223,7 +1240,7 @@ function FooterSection() {
               onMouseLeave={e => e.currentTarget.style.color = "#8e8e98"}
             >
               <Github size={16} />
-              <span className="mono" style={{ fontSize: 12 }}>github.com/vaibhav-karbhantnal</span>
+              <span className="mono" style={{ fontSize: 12 }}>github.com/NukGod-V</span>
             </a>
           </div>
 
@@ -1248,7 +1265,7 @@ function FooterSection() {
         gap: 16,
       }}>
         <span className="mono" style={{ fontSize: 10, color: "#2a2a2a", letterSpacing: "0.15em" }}>
-          © 2026 VAIBHAV KARBHANTNAL // MCA 1BY23MC097 // ALL SYSTEMS OPERATIONAL
+          © 2026 VAIBHAV KARBHANTNAL // Akka NukGod // ALL SYSTEMS OPERATIONAL
         </span>
         <span className="mono" style={{ fontSize: 10, color: "#2a2a2a", letterSpacing: "0.1em" }}>
           BUILT WITH R3F + FASTAPI PRECISION
