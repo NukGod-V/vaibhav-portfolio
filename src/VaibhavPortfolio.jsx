@@ -475,6 +475,7 @@ const PROJECTS = [
     statLabel: "Normalized Schema",
     icon: "📡",
     link:"https://github.com/NukGod-V/Mailer-System",
+    liveLink: "https://mailer-system.vaibhavkarbhantnal.me",
     desc: "End-to-end email orchestration: schedule → validate → dispatch → track transparently.",
   },
   {
@@ -560,7 +561,7 @@ function CustomCursor() {
     const onLeave = () => setHovering(false);
 
     document.addEventListener("mousemove", moveCursor);
-    document.querySelectorAll("a, button, .project-card, .hoverable")
+    document.querySelectorAll("a, button, .hoverable")
       .forEach(el => {
         el.addEventListener("mouseenter", onEnter);
         el.addEventListener("mouseleave", onLeave);
@@ -825,18 +826,15 @@ function ProjectsSection() {
         gap: 2,
       }}>
         {PROJECTS.map((p, i) => (
-          <a
+          <div // 👈 Changed BACK to <div> so we don't break HTML rules
             key={p.id}
-            href={p.link}
-            target="_blank"
-            rel="noopener noreferrer"
             className={`project-card ${p.accent} fade-up`}
             style={{
-              display: "block",       // 👈 Ensures the <a> tag behaves like a container
-              textDecoration: "none", // 👈 Removes the default blue underline
-              color: "inherit",       // 👈 Keeps your custom text colors intact
+              display: "flex",       // 👈 Added flex layout inside the card
+              flexDirection: "column",
               padding: "40px 36px 36px",
               transitionDelay: `${i * 0.1}s`,
+              height: "100%",        // Ensures all cards match height in the grid
             }}
           >
             {/* Card top row */}
@@ -914,20 +912,42 @@ function ProjectsSection() {
               height: 1,
               background: `linear-gradient(90deg, ${p.accent === "blue" ? "rgba(0,229,255,0.2)" : "rgba(255,109,0,0.2)"}, transparent)`,
               marginBottom: 24,
+              marginTop: "auto", // 👈 This pushes the links perfectly to the bottom!
             }} />
 
-            {/* Link */}
-            <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-              <ExternalLink size={12} color={p.accent === "blue" ? "#00e5ff" : "#ff6d00"} />
-              <span className="mono" style={{
-                color: p.accent === "blue" ? "#00e5ff" : "#ff6d00",
-                fontSize: 11,
-                letterSpacing: "0.1em",
-              }}>
-                INSPECT ARCHITECTURE
-              </span>
+            {/* Links Section (Now supports multiple links) */}
+            <div style={{ display: "flex", alignItems: "center", gap: 24, flexWrap: "wrap" }}>
+
+              {/* Repo Link */}
+              {p.link && (
+                <a href={p.link} target="_blank" rel="noopener noreferrer" style={{ display: "flex", alignItems: "center", gap: 6, textDecoration: "none" }}>
+                  <Terminal size={12} color={p.accent === "blue" ? "#00e5ff" : "#ff6d00"} />
+                  <span className="mono" style={{
+                    color: p.accent === "blue" ? "#00e5ff" : "#ff6d00",
+                    fontSize: 11,
+                    letterSpacing: "0.1em",
+                  }}>
+                    SOURCE CODE
+                  </span>
+                </a>
+              )}
+
+              {/* Live Deployment Link */}
+              {p.liveLink && (
+                <a href={p.liveLink} target="_blank" rel="noopener noreferrer" style={{ display: "flex", alignItems: "center", gap: 6, textDecoration: "none" }}>
+                  <ExternalLink size={12} color={p.accent === "blue" ? "#00e5ff" : "#ff6d00"} />
+                  <span className="mono" style={{
+                    color: p.accent === "blue" ? "#00e5ff" : "#ff6d00",
+                    fontSize: 11,
+                    letterSpacing: "0.1em",
+                  }}>
+                    LIVE SYSTEM
+                  </span>
+                </a>
+              )}
+
             </div>
-          </a>
+          </div>
         ))}
       </div>
     </section>
