@@ -463,6 +463,7 @@ const PROJECTS = [
     statLabel: "XGBoost Model",
     icon: "🌲",
     link:"https://github.com/NukGod-V/Forest-Fire-Monitor",
+    liveLink:"https://forest-fire.vaibhavkarbhantnal.me/",
     desc: "Geospatial AI pipeline ingesting live thermal satellite data → risk heatmap in milliseconds.",
   },
   {
