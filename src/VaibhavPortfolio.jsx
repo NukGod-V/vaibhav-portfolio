@@ -14,7 +14,7 @@ const DOMAIN = "vaibhavkarbhantnal.me";
 // ────────────────────────────────────────────────────────────
 
 import { useRef, useState, useEffect, useMemo, Suspense } from "react";
-import { Analytics } from "@vercel/analytics/next"
+import { Analytics } from "@vercel/analytics/react"
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import {
   OrbitControls,
