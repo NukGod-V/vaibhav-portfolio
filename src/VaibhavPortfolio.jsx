@@ -1,4 +1,3 @@
-
 // ============================================================
 // VAIBHAV KARBHANTNAL — COSMIC BACKEND PORTFOLIO
 // Stack: React + Three.js / R3F + Tailwind CSS + Lucide React
@@ -39,7 +38,10 @@ import {
   ArrowUpRight,
   MapPin,
   Circle,
+  MessageSquare,
+  X,
 } from "lucide-react";
+import ChatWidget from "./ChatWidget";
 // Custom drop-in replacements for brand icons removed by Lucide
 const Github = (props) => (
   <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round" {...props}>
@@ -85,7 +87,7 @@ const GLOBAL_CSS = `
     cursor: none;
   }
 
-  /* CUSTOM CURSOR */
+  /* CUSTOM CURSOR (desktop / fine-pointer devices only) */
   .cursor-dot {
     position: fixed; top: 0; left: 0;
     width: 8px; height: 8px;
@@ -110,6 +112,13 @@ const GLOBAL_CSS = `
   .cursor-ring.hovering {
     width: 56px; height: 56px;
     border-color: var(--orange);
+  }
+
+  /* On touch devices there is no hover/mouse — restore the native cursor
+     and hide the custom dot/ring so nothing gets stuck on screen. */
+  @media (hover: none), (pointer: coarse) {
+    body { cursor: auto; }
+    .cursor-dot, .cursor-ring { display: none; }
   }
 
   /* SCANLINE OVERLAY */
@@ -267,10 +276,49 @@ const GLOBAL_CSS = `
   ::-webkit-scrollbar-thumb { background: var(--grey); border-radius: 4px; }
   ::-webkit-scrollbar-thumb:hover { background: var(--blue); }
 
-  /* RESPONSIVE */
+  /* ═══════════════ RESPONSIVE / MOBILE ═══════════════ */
+
+  /* Grids that are hard-coded to two columns via inline styles need
+     !important here to win over the inline style on small screens. */
+  @media (max-width: 860px) {
+    .skills-matrix-grid { grid-template-columns: 1fr !important; gap: 40px !important; }
+    .skills-matrix-grid > div:nth-child(2) { padding-top: 0 !important; }
+
+    .footer-grid { grid-template-columns: 1fr !important; gap: 48px !important; }
+
+    .timeline-row {
+      grid-template-columns: 28px 1fr !important;
+      gap: 20px !important;
+      margin-bottom: 40px !important;
+    }
+    .timeline-row .timeline-spacer { display: none !important; }
+    .timeline-row .timeline-content { text-align: left !important; }
+    .timeline-row .timeline-node-col { align-items: flex-start !important; }
+    .timeline-row .timeline-node-col > div { margin-top: 4px !important; }
+  }
+
   @media (max-width: 768px) {
-    .timeline-line { left: 20px; }
-    .hero-canvas { height: 50vh !important; }
+    .timeline-line { left: 14px; }
+    .hero-canvas { height: 55vh !important; }
+
+    nav.site-nav { padding: 14px 5vw !important; }
+    nav.site-nav .nav-links { gap: 18px !important; }
+    nav.site-nav .nav-links a { font-size: 9px !important; letter-spacing: 0.14em !important; }
+
+    #hero { padding-bottom: 60px; }
+    #hero .hero-copy { padding: 0 5vw !important; }
+    #hero .hero-cta { flex-direction: column !important; align-items: stretch !important; }
+    #hero .hero-cta a { justify-content: center !important; }
+
+    #projects, #journey { padding: 80px 5vw !important; }
+    .project-card { padding: 32px 24px 28px !important; }
+
+    footer#contact { padding: 56px 5vw 32px !important; }
+    footer .footer-bottom-bar { flex-direction: column !important; align-items: flex-start !important; gap: 8px !important; }
+  }
+
+  @media (max-width: 480px) {
+    .status-badge span { font-size: 9.5px !important; letter-spacing: 0.1em !important; }
   }
 `;
 
@@ -278,12 +326,27 @@ const GLOBAL_CSS = `
 // 3D COMPONENTS
 // ─────────────────────────────────────────────────
 
+/** Small hook: true when viewport is at/under a mobile breakpoint.
+ *  Used to cut down particle counts for smoother mobile GPU performance. */
+function useIsMobile(breakpoint = 768) {
+  const [isMobile, setIsMobile] = useState(
+    typeof window !== "undefined" ? window.innerWidth <= breakpoint : false
+  );
+  useEffect(() => {
+    const onResize = () => setIsMobile(window.innerWidth <= breakpoint);
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, [breakpoint]);
+  return isMobile;
+}
+
 /** Central spinning "Data Kernel" — wireframe icosahedron + distort sphere */
 function DataKernel({ mouse }) {
   const groupRef = useRef();
   const icoRef = useRef();
   const innerRef = useRef();
   const ringRef = useRef();
+  const isMobile = useIsMobile();
 
   useFrame(({ clock }) => {
     const t = clock.getElapsedTime();
@@ -349,9 +412,9 @@ function DataKernel({ mouse }) {
         <meshBasicMaterial color="#ff6d00" opacity={0.25} transparent />
       </mesh>
 
-      {/* Sparkles cloud */}
+      {/* Sparkles cloud — fewer on mobile to keep frame rate smooth */}
       <Sparkles
-        count={80}
+        count={isMobile ? 30 : 80}
         scale={5}
         size={1.2}
         speed={0.3}
@@ -392,12 +455,13 @@ function OrbitalNode({ radius, speed, color, size, offset }) {
 
 /** Background star field with depth */
 function BackgroundField() {
+  const isMobile = useIsMobile();
   return (
     <>
       <Stars
         radius={90}
         depth={50}
-        count={3000}
+        count={isMobile ? 1200 : 3000}
         factor={3}
         saturation={0}
         fade
@@ -547,6 +611,11 @@ function CustomCursor() {
   const [hovering, setHovering] = useState(false);
 
   useEffect(() => {
+    // Touch / coarse-pointer devices don't have a mouse cursor at all —
+    // skip all of the listener setup so nothing is left stuck on screen.
+    const isTouch = window.matchMedia("(hover: none), (pointer: coarse)").matches;
+    if (isTouch) return;
+
     const moveCursor = (e) => {
       if (dotRef.current) {
         dotRef.current.style.left = e.clientX + "px";
@@ -611,14 +680,14 @@ function HeroSection({ mouse }) {
       style={{
         position: "relative",
         height: "100vh",
-        minHeight: 600,
+        minHeight: 560,
         display: "flex",
         flexDirection: "column",
         overflow: "hidden",
       }}
     >
       {/* 3D Canvas */}
-      <div style={{ position: "absolute", inset: 0 }}>
+      <div className="hero-canvas" style={{ position: "absolute", inset: 0 }}>
         <Canvas
           dpr={[1, 1.5]}
           gl={{ antialias: true, alpha: true }}
@@ -652,7 +721,7 @@ function HeroSection({ mouse }) {
       }} />
 
       {/* Overlay text */}
-      <div style={{
+      <div className="hero-copy" style={{
         position: "relative",
         zIndex: 10,
         display: "flex",
@@ -663,13 +732,14 @@ function HeroSection({ mouse }) {
         pointerEvents: "none",
       }}>
         {/* Status badge */}
-        <div style={{
+        <div className="status-badge" style={{
           display: "flex",
           alignItems: "center",
           gap: 10,
           marginBottom: 28,
+          flexWrap: "wrap",
         }}>
-          <div style={{ position: "relative", width: 10, height: 10 }}>
+          <div style={{ position: "relative", width: 10, height: 10, flexShrink: 0 }}>
             <div style={{
               position: "absolute", inset: 0,
               borderRadius: "50%",
@@ -725,12 +795,13 @@ function HeroSection({ mouse }) {
         </p>
 
         {/* CTA row */}
-        <div style={{ display: "flex", gap: 16, pointerEvents: "all" }}>
+        <div className="hero-cta" style={{ display: "flex", gap: 16, pointerEvents: "all", flexWrap: "wrap" }}>
           <a
             href="#projects"
             style={{
               display: "inline-flex",
               alignItems: "center",
+              justifyContent: "center",
               gap: 8,
               padding: "12px 28px",
               background: "#00e5ff",
@@ -754,6 +825,7 @@ function HeroSection({ mouse }) {
             style={{
               display: "inline-flex",
               alignItems: "center",
+              justifyContent: "center",
               gap: 8,
               padding: "12px 28px",
               background: "transparent",
@@ -824,19 +896,19 @@ function ProjectsSection() {
       {/* Cards grid */}
       <div style={{
         display: "grid",
-        gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
+        gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
         gap: 2,
       }}>
         {PROJECTS.map((p, i) => (
-          <div // 👈 Changed BACK to <div> so we don't break HTML rules
+          <div
             key={p.id}
             className={`project-card ${p.accent} fade-up`}
             style={{
-              display: "flex",       // 👈 Added flex layout inside the card
+              display: "flex",
               flexDirection: "column",
               padding: "40px 36px 36px",
               transitionDelay: `${i * 0.1}s`,
-              height: "100%",        // Ensures all cards match height in the grid
+              height: "100%",
             }}
           >
             {/* Card top row */}
@@ -914,7 +986,7 @@ function ProjectsSection() {
               height: 1,
               background: `linear-gradient(90deg, ${p.accent === "blue" ? "rgba(0,229,255,0.2)" : "rgba(255,109,0,0.2)"}, transparent)`,
               marginBottom: 24,
-              marginTop: "auto", // 👈 This pushes the links perfectly to the bottom!
+              marginTop: "auto",
             }} />
 
             {/* Links Section (Now supports multiple links) */}
@@ -965,7 +1037,7 @@ function SkillsMatrix() {
       borderTop: "1px solid #111",
       borderBottom: "1px solid #111",
     }}>
-      <div style={{
+      <div className="skills-matrix-grid" style={{
         display: "grid",
         gridTemplateColumns: "1fr 1fr",
         gap: 60,
@@ -1072,7 +1144,7 @@ function TimelineSection() {
         {TIMELINE.map((item, i) => (
           <div
             key={i}
-            className="fade-up"
+            className="fade-up timeline-row"
             style={{
               display: "grid",
               gridTemplateColumns: "1fr auto 1fr",
@@ -1083,15 +1155,15 @@ function TimelineSection() {
           >
             {/* Left content or spacer */}
             {item.side === "left" ? (
-              <div style={{ textAlign: "right" }}>
+              <div className="timeline-content" style={{ textAlign: "right" }}>
                 <TimelineCard item={item} />
               </div>
             ) : (
-              <div />
+              <div className="timeline-spacer" />
             )}
 
             {/* Center node */}
-            <div style={{
+            <div className="timeline-node-col" style={{
               display: "flex",
               flexDirection: "column",
               alignItems: "center",
@@ -1112,11 +1184,11 @@ function TimelineSection() {
 
             {/* Right content or spacer */}
             {item.side === "right" ? (
-              <div>
+              <div className="timeline-content">
                 <TimelineCard item={item} />
               </div>
             ) : (
-              <div />
+              <div className="timeline-spacer" />
             )}
           </div>
         ))}
@@ -1170,7 +1242,7 @@ function FooterSection() {
       borderTop: "1px solid #111",
       padding: "80px 6vw 48px",
     }}>
-      <div style={{
+      <div className="footer-grid" style={{
         display: "grid",
         gridTemplateColumns: "1fr 1fr",
         gap: 60,
@@ -1187,12 +1259,14 @@ function FooterSection() {
             border: "1px solid #1a1a1a",
             padding: "24px 28px",
             borderRadius: 2,
+            overflowX: "auto",
           }}>
             {cmds.map((cmd, i) => (
               <div key={i} className="mono" style={{
                 fontSize: 12,
                 lineHeight: 2,
                 color: cmd.startsWith("$") ? "#00e5ff" : cmd.startsWith(">") ? "#8e8e98" : "#3a3a3a",
+                whiteSpace: "nowrap",
               }}>
                 {cmd}
               </div>
@@ -1230,7 +1304,7 @@ function FooterSection() {
               onMouseLeave={e => e.currentTarget.style.color = "#8e8e98"}
             >
               <Mail size={16} />
-              <span className="mono" style={{ fontSize: 12 }}>{EMAIL}</span>
+              <span className="mono" style={{ fontSize: 12, wordBreak: "break-all" }}>{EMAIL}</span>
             </a>
             <a
               href={`https://${DOMAIN}`}
@@ -1277,7 +1351,7 @@ function FooterSection() {
       </div>
 
       {/* Bottom bar */}
-      <div style={{
+      <div className="footer-bottom-bar" style={{
         borderTop: "1px solid #111",
         paddingTop: 24,
         display: "flex",
@@ -1308,7 +1382,7 @@ function NavBar() {
   }, []);
 
   return (
-    <nav style={{
+    <nav className="site-nav" style={{
       position: "fixed",
       top: 0,
       left: 0,
@@ -1337,7 +1411,7 @@ function NavBar() {
       </div>
 
       {/* Nav links */}
-      <div style={{ display: "flex", gap: 32 }}>
+      <div className="nav-links" style={{ display: "flex", gap: 32 }}>
         {[["SYSTEMS", "#projects"], ["JOURNEY", "#journey"], ["CONTACT", "#contact"]].map(([label, href]) => (
           <a
             key={href}
@@ -1407,6 +1481,11 @@ export default function VaibhavPortfolio() {
       <SkillsMatrix />
       <TimelineSection />
       <FooterSection />
+
+      {/* Personal AI agent — floating chat widget, wired to /api/chat */}
+      <ChatWidget />
+
+      <Analytics />
     </div>
   );
 }
